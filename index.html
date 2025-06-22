@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<head>
+    <style> 
+    .clickable {
+      color: blue;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .target {
+      background-color: yellow;
+    }
+  </style>
+
+
+  <meta charset="UTF-8">
+  <title>ระบบจัดการสต็อกสินค้า</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .item-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .item-list li {
+      margin-bottom: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    table th {
+      background-color: #f0f0f0;
+    }
+  </style>
+
+
+  <title>ระบบส่งของ</title>
+
+  
+
+</head>
+<body>
+    <center><image src="c:\Users\AdviceDT\OneDrive\Pictures\น่ารัก\495571368_669840272353652_8485833872132209333_n.jpg" width="20%"></image><br></center>
+ <br><br><br><br>
+    <center>
+    <button><h1 ><span class="clickable">ของในคลัง</span></h1></button>
+    
+  <button><h1 ><span class="clickable"> การส่งของ</span></h1></button>
+  
+   <button><h1 ><span class="clickable"> การรับของ</span></h1></button>
+  
+  <button><h1 ><span class="clickable">บันทึกการส่งของ</span></h1></button>
+</center>
+
+
+
+
+
+
+
+<center>
+    <p style="margin-top: 8000px;">
+        <h1><button><span class="target">ของในคลัง</span></button></h1>
+    </p>
+</center>
+
+
+<h2>ระบบจัดการสินค้า</h2>
+
+<!-- dropdown เลือกสินค้า -->
+<label for="itemName">ชื่อสินค้า:</label>
+<select id="itemName">
+  <option disabled selected>-- เลือกสินค้า --</option>
+</select>
+<button onclick="promptNewItem()">+ เพิ่มสินค้าใหม่</button>
+<br><br>
+
+<button onclick="editItemName()">✏️ แก้ไขชื่อสินค้า</button>
+
+<input type="number" id="amount" placeholder="จำนวน">
+<br><br>
+
+<button onclick="updateStock('+')">เพิ่มสินค้า</button>
+<button onclick="updateStock('-')">ลดสินค้า</button>
+<br><br>
+
+<h3>จำนวนคงเหลือของ <span id="currentItem">-</span>: <span id="stock">0</span></h3>
+
+<!-- ส่วนแสดงรายการสินค้าทั้งหมด -->
+<h3> สินค้าทั้งหมดในร้าน</h3>
+<ul id="itemList" class="item-list"></ul>
+
+<!-- ปุ่มเปิด/ปิดประวัติ -->
+<button onclick="toggleHistory()">เปิด/ปิด ประวัติการเปลี่ยนแปลง</button>
+<br><br>
+
+
+
+<!-- ส่วนแสดงประวัติ -->
+<div id="historySection"style="display: none;">
+  <h3>ประวัติการเปลี่ยนแปลง:</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>วันที่</th>
+        <th>ชื่อสินค้า</th>
+        <th>ประเภท</th>
+        <th>จำนวนที่เปลี่ยน</th>
+        <th>คงเหลือ</th>
+      </tr>
+    </thead>
+    <tbody id="logTable"></tbody>
+  </table>
+</div>
+
+<br><br>
+
+
+<script>
+let stock = {};
+
+function updateStock(op) {
+  const select = document.getElementById('itemName');
+  const item = select.value;
+  const amount = parseInt(document.getElementById('amount').value);
+  const now = new Date().toLocaleString();
+
+  if (!item || isNaN(amount)) {
+    alert("กรุณาเลือกชื่อสินค้าและกรอกจำนวนให้ครบ");
+    return;
+  }
+
+  if (!stock[item]) stock[item] = 0;
+
+  if (op === '+') {
+    stock[item] += amount;
+  } else {
+    stock[item] -= amount;
+    if (stock[item] < 0) stock[item] = 0;
+  }
+
+  document.getElementById('stock').textContent = stock[item];
+  document.getElementById('currentItem').textContent = item;
+
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${now}</td>
+    <td>${item}</td>
+    <td>${op === '+' ? 'เพิ่ม' : 'ลด'}</td>
+    <td>${amount}</td>
+    <td>${stock[item]}</td>
+  `;
+  document.getElementById('logTable').prepend(row);
+
+  renderItemList();
+}
+
+function toggleHistory() {
+  const section = document.getElementById('historySection');
+  section.style.display = section.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderItemList() {
+  const itemList = document.getElementById('itemList');
+  itemList.innerHTML = '';
+  for (let name in stock) {
+    const li = document.createElement('li');
+    li.textContent = `${name}: ${stock[name]} ชิ้น`;
+    itemList.appendChild(li);
+  }
+}
+
+// เพิ่มชื่อสินค้าใหม่ผ่าน prompt
+function promptNewItem() {
+  const newItem = prompt("กรอกชื่อสินค้าใหม่:");
+  if (!newItem) return;
+
+  const select = document.getElementById('itemName');
+  // ตรวจสอบว่าซ้ำหรือยัง
+  for (let i = 0; i < select.options.length; i++) {
+    if (select.options[i].value === newItem) {
+      alert("สินค้านี้มีอยู่แล้ว");
+      return;
+    }
+  }
+
+  const option = document.createElement('option');
+  option.value = newItem;
+  option.textContent = newItem;
+  select.appendChild(option);
+  select.value = newItem;
+  stock[newItem] = stock[newItem] || 0;
+
+  renderItemList();
+}
+function editItemName() {
+  const select = document.getElementById('itemName');
+  const oldName = select.value;
+
+  if (!oldName) {
+    alert("กรุณาเลือกสินค้าที่ต้องการแก้ไขชื่อ");
+    return;
+  }
+
+  const newName = prompt(`แก้ไขชื่อสินค้า "${oldName}" เป็น:`, oldName);
+  if (!newName || newName === oldName) return;
+
+  if (stock[newName]) {
+    alert("ชื่อสินค้าที่ใส่มีอยู่แล้ว");
+    return;
+  }
+
+  // อัปเดต stock object
+  stock[newName] = stock[oldName];
+  delete stock[oldName];
+
+  // อัปเดต dropdown
+  for (let option of select.options) {
+    if (option.value === oldName) {
+      option.value = newName;
+      option.textContent = newName;
+    }
+  }
+
+  // เลือกชื่อใหม่ไว้
+  select.value = newName;
+
+  renderItemList();
+  document.getElementById('currentItem').textContent = newName;
+  document.getElementById('stock').textContent = stock[newName];
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<center>
+    <p style="margin-top: 8000px;">
+        <button><span class="target">การส่งของ</span></button>
+    </p>
+</center>
+
+<hr>
+<h3>🧾 ใบส่งของ</h3>
+
+<label for="customerName">ชื่อลูกค้า:</label>
+<input type="text" id="customerName">
+<br><br>
+
+<label for="deliveryDate">วันที่:</label>
+<input type="date" id="deliveryDate">
+<br><br>
+
+<!-- รายการในใบส่งของ -->
+<h4>รายการสินค้า</h4>
+จำนวน: <input type="number" id="deliveryQty" style="width: 60px;">
+ชื่อสินค้า:
+<select id="deliveryItem">
+  <option disabled selected>-- เลือกสินค้า --</option>
+</select>
+ราคาต่อหน่วย: <input type="number" id="deliveryPrice" style="width: 80px;">
+<button onclick="addDeliveryItem()">เพิ่มรายการ</button>
+
+<br><br>
+<table>
+  <thead>
+    <tr>
+      <th>จำนวน</th>
+      <th>ชื่อสินค้า</th>
+      <th>ราคาต่อหน่วย</th>
+      <th>ราคารวม</th>
+    </tr>
+  </thead>
+  <tbody id="deliveryTableBody"></tbody>
+  <tfoot>
+    <tr>
+      <th colspan="3">ราคารวมทั้งหมด</th>
+      <th id="grandTotal">0</th>
+    </tr>
+  </tfoot>
+</table>
+
+<br>
+
+<button onclick="saveDelivery()">📥 บันทึกใบส่งของ</button>
+
+<script>
+// เติม dropdown รายการสินค้าสำหรับใบส่งของ
+function refreshDeliveryDropdown() {
+  const deliverySelect = document.getElementById('deliveryItem');
+  deliverySelect.innerHTML = '<option disabled selected>-- เลือกสินค้า --</option>';
+  for (let name in stock) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    deliverySelect.appendChild(option);
+  }
+}
+refreshDeliveryDropdown();
+
+// เรียกทุกครั้งที่เพิ่มสินค้าใหม่
+const oldPromptNewItem = promptNewItem;
+promptNewItem = function() {
+  oldPromptNewItem();
+  refreshDeliveryDropdown();
+};
+
+let deliveryItems = [];
+
+function addDeliveryItem() {
+  const qty = parseInt(document.getElementById('deliveryQty').value);
+  const item = document.getElementById('deliveryItem').value;
+  const price = parseFloat(document.getElementById('deliveryPrice').value);
+
+  if (!item || isNaN(qty) || isNaN(price)) {
+    alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+    return;
+  }
+
+  if (!stock[item] || stock[item] < qty) {
+    alert(`สินค้า "${item}" มีจำนวนไม่พอในคลัง (เหลือ ${stock[item] || 0})`);
+    return;
+  }
+
+  // ลบจำนวนออกจากสต็อก
+  stock[item] -= qty;
+
+  // บันทึกในใบส่งของ
+  const total = qty * price;
+  deliveryItems.push({ qty, item, price, total });
+
+  renderDeliveryTable();
+  renderItemList(); // อัปเดตรายการคงเหลือ
+  updateCurrentStockDisplay(item); // อัปเดตช่องแสดง "จำนวนคงเหลือของ..."
+}
+
+function renderDeliveryTable() {
+  const tbody = document.getElementById('deliveryTableBody');
+  tbody.innerHTML = '';
+
+  let grandTotal = 0;
+  deliveryItems.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${entry.qty}</td>
+      <td>${entry.item}</td>
+      <td>${entry.price.toFixed(2)}</td>
+      <td>${entry.total.toFixed(2)}</td>
+    `;
+    tbody.appendChild(row);
+    grandTotal += entry.total;
+  });
+
+  document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+}
+function updateCurrentStockDisplay(itemName) {
+  document.getElementById('currentItem').textContent = itemName;
+  document.getElementById('stock').textContent = stock[itemName] || 0;
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<center>
+    <p style="margin-top: 8000px;">
+        <button><span class="target">การรับของ</span></button>
+    </p>
+</center>
+
+<hr>
+<h3>📥 รับของเข้าคลัง</h3>
+
+<label for="source">ที่มา:</label>
+<input type="text" id="source">
+<br><br>
+
+<label for="receiveDate">วันที่:</label>
+<input type="date" id="receiveDate">
+<br><br>
+
+จำนวน: <input type="number" id="receiveQty" style="width: 60px;">
+ชื่อสินค้า:
+<select id="receiveItem">
+  <option disabled selected>-- เลือกสินค้า --</option>
+</select>
+<button onclick="addReceiveTempItem()">+ เพิ่มรายการ</button>
+
+<br><br>
+<h4>📝 รายการที่กำลังจะรับ</h4>
+<table>
+  <thead>
+    <tr>
+      <th>จำนวน</th>
+      <th>ชื่อสินค้า</th>
+      <th>ลบ</th>
+    </tr>
+  </thead>
+  <tbody id="receiveTempList"></tbody>
+</table>
+<br>
+<button onclick="confirmReceive()">📥 รับของ</button>
+
+<br><br>
+<h4>📄 รายการที่รับแล้ว</h4>
+
+<button onclick="toggleReceiveList()">เปิด/ปิด รายการที่รับแล้ว</button>
+<br><br>
+<label for="filterReceiveDate">🔍 ดูรายการเฉพาะวันที่:</label>
+<input type="date" id="filterReceiveDate">
+<button onclick="renderReceiveList()">ดูรายการวันที่เลือก</button>
+
+<div id="receiveList" style="display:none;"></div>
+
+<script>
+let receiveTempItems = [];
+let receivedRecords = [];
+let receiveListVisible = false;
+
+function addReceiveTempItem() {
+  const qty = parseInt(document.getElementById('receiveQty').value);
+  const item = document.getElementById('receiveItem').value;
+
+  if (!item || isNaN(qty) || qty <= 0) {
+    alert("กรุณาเลือกชื่อสินค้าและจำนวนที่ถูกต้อง");
+    return;
+  }
+
+  receiveTempItems.push({ item, qty });
+  renderReceiveTempList();
+}
+
+function removeTempItem(index) {
+  receiveTempItems.splice(index, 1);
+  renderReceiveTempList();
+}
+
+function renderReceiveTempList() {
+  const tbody = document.getElementById('receiveTempList');
+  tbody.innerHTML = '';
+  receiveTempItems.forEach((entry, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${entry.qty}</td>
+      <td>${entry.item}</td>
+      <td><button onclick="removeTempItem(${index})">ลบ</button></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function confirmReceive() {
+  const source = document.getElementById('source').value.trim();
+  const date = document.getElementById('receiveDate').value;
+
+  if (!source || !date || receiveTempItems.length === 0) {
+    alert("กรุณากรอกที่มา, วันที่ และเพิ่มรายการอย่างน้อย 1 รายการ");
+    return;
+  }
+
+  const groupId = Date.now();
+
+  receiveTempItems.forEach(entry => {
+    if (!stock[entry.item]) stock[entry.item] = 0;
+    stock[entry.item] += entry.qty;
+
+    const now = new Date().toLocaleString();
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${now}</td>
+      <td>${entry.item}</td>
+      <td>เพิ่ม (รับเข้า)</td>
+      <td>${entry.qty}</td>
+      <td>${stock[entry.item]}</td>
+    `;
+    document.getElementById('logTable').prepend(row);
+
+    receivedRecords.push({
+      source,
+      date,
+      item: entry.item,
+      qty: entry.qty,
+      group: groupId
+    });
+  });
+
+  receiveTempItems = [];
+  renderReceiveTempList();
+  renderReceiveList();
+  renderItemList();
+}
+
+function toggleReceiveList() {
+  const container = document.getElementById('receiveList');
+  receiveListVisible = !receiveListVisible;
+  container.style.display = receiveListVisible ? 'block' : 'none';
+}
+
+function renderReceiveList() {
+  const filterDate = document.getElementById('filterReceiveDate').value;
+  const container = document.getElementById('receiveList');
+
+  if (!filterDate) {
+    container.innerHTML = '<p>กรุณาเลือกวันที่เพื่อแสดงรายการ</p>';
+    return;
+  }
+
+  container.style.display = receiveListVisible ? 'block' : 'none';
+  container.innerHTML = '';
+
+  const filtered = receivedRecords.filter(entry => entry.date === filterDate);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>ไม่พบรายการในวันที่เลือก</p>';
+    return;
+  }
+
+  const grouped = {};
+  filtered.forEach(entry => {
+    if (!grouped[entry.group]) grouped[entry.group] = { source: entry.source, date: entry.date, items: [] };
+    grouped[entry.group].items.push({ item: entry.item, qty: entry.qty });
+  });
+
+  Object.values(grouped).reverse().forEach(record => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '10px';
+    div.style.padding = '8px';
+    div.style.border = '1px solid #ccc';
+    div.innerHTML = `
+      <strong>ที่มา:</strong> ${record.source}<br>
+      <strong>วันที่:</strong> ${record.date}<br>
+      <strong>รายการ:</strong><br>
+      <ul>
+        ${record.items.map(i => `<li>${i.item} - ${i.qty} ชิ้น</li>`).join('')}
+      </ul>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function refreshReceiveDropdown() {
+  const select = document.getElementById('receiveItem');
+  select.innerHTML = '<option disabled selected>-- เลือกสินค้า --</option>';
+  for (let name in stock) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  }
+}
+
+const originalPromptNewItem = promptNewItem;
+promptNewItem = function () {
+  originalPromptNewItem();
+  refreshReceiveDropdown();
+};
+
+refreshReceiveDropdown();
+</script>
+
+
+
+
+
+<center>
+    <p style="margin-top: 8000px;">
+        <button><span class="target">บันทึกการส่งของ</span></button>
+    </p>
+</center>
+
+<br><br>
+<label for="filterDate">🔍 เลือกวันที่เพื่อกรอง:</label>
+<input type="date" id="filterDate" onchange="renderSavedDeliveries()">
+<br><br>
+
+<button onclick="toggleSavedDeliveries()">เปิด/ปิด</button>
+
+<h3>📄 รายการใบส่งของทั้งหมด</h3>
+<div id="savedDeliveryList" style="display: block;"></div>
+
+<script>
+let savedDeliveries = [];
+let savedVisible = true;
+
+function toggleSavedDeliveries() {
+  const container = document.getElementById('savedDeliveryList');
+  savedVisible = !savedVisible;
+  container.style.display = savedVisible ? 'block' : 'none';
+}
+
+function saveDelivery() {
+  const customerName = document.getElementById('customerName').value.trim();
+  const deliveryDate = document.getElementById('deliveryDate').value;
+
+  if (!customerName || !deliveryDate || deliveryItems.length === 0) {
+    alert("กรุณากรอกชื่อลูกค้า, วันที่ และเพิ่มรายการสินค้าอย่างน้อย 1 รายการ");
+    return;
+  }
+
+  const grandTotal = deliveryItems.reduce((sum, item) => sum + item.total, 0);
+
+  const data = {
+    customer: customerName,
+    date: deliveryDate,
+    items: [...deliveryItems],
+    total: grandTotal
+  };
+
+  savedDeliveries.push(data);
+
+  alert("✅ บันทึกใบส่งของเรียบร้อย!");
+  deliveryItems = [];
+  renderDeliveryTable();
+  renderSavedDeliveries();
+}
+
+function renderSavedDeliveries() {
+  const container = document.getElementById('savedDeliveryList');
+  const filterDate = document.getElementById('filterDate').value;
+  container.innerHTML = '';
+
+  if (!filterDate) {
+    container.innerHTML = '<p>กรุณาเลือกวันที่ก่อน</p>';
+    return;
+  }
+
+  const filtered = savedDeliveries.filter(d => d.date === filterDate);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>ไม่พบใบส่งของในวันที่เลือก</p>';
+    return;
+  }
+
+  filtered.forEach(entry => {
+    const div = document.createElement('div');
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginBottom = "15px";
+
+    let html = `
+      <strong>ลูกค้า:</strong> ${entry.customer}<br>
+      <strong>วันที่:</strong> ${entry.date}<br><br>
+      <table>
+        <thead>
+          <tr>
+            <th>จำนวน</th>
+            <th>ชื่อสินค้า</th>
+            <th>ราคาต่อหน่วย</th>
+            <th>ราคารวม</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    entry.items.forEach(item => {
+      html += `
+        <tr>
+          <td>${item.qty}</td>
+          <td>${item.item}</td>
+          <td>${item.price.toFixed(2)}</td>
+          <td>${item.total.toFixed(2)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="3">รวมทั้งหมด</th>
+            <th>${entry.total.toFixed(2)}</th>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+
+    div.innerHTML = html;
+    container.appendChild(div);
+  });
+}
+
+</script>
+
+
+
+
+
+
+<p style="margin-top: 8000px;"></p>
+
+<!-- ปุ่มด้านล่างขวา -->
+<button onclick="scrollToTop()" style="
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 10px 15px;
+  font-size: 18px;
+  border-radius: 50%;
+  border: none;
+  background-color: #333;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+" title="กลับไปด้านบน">⬆</button>
+
+<script>
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+  
+  <script>
+document.querySelectorAll('.clickable').forEach(element => {
+  element.addEventListener('click', () => {
+    const targetText = element.textContent.trim();
+    const targets = document.querySelectorAll('.target');
+
+    for (let target of targets) {
+      if (target.textContent.trim() === targetText) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.border = '2px solid red';
+        setTimeout(() => target.style.border = '', 1500);
+        break;
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>

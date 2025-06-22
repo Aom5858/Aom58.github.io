@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<head>
+  <style>
+    .clickable {
+      color: blue;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .target {
+      background-color: yellow;
+    }
+  </style>
+</head>
+<body>
+    
+
+<p>
+  <span class="clickable">นึก</span>
+</p>
+
+<p>
+
+</p>
+
+<p style="margin-top: 800px;"> <!-- เพื่อให้เห็นการเลื่อน -->
+  <span class="target">นึก</span> 
+</p>
+
+<script>
+document.querySelectorAll('.clickable').forEach(element => {
+  element.addEventListener('click', () => {
+    const targetText = element.textContent.trim();
+    const targets = document.querySelectorAll('.target');
+
+    for (let target of targets) {
+      if (target.textContent.trim() === targetText) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.style.border = '2px solid red';
+        setTimeout(() => target.style.border = '', 1500);
+        break;
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>
