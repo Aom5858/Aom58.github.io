@@ -755,5 +755,31 @@ document.querySelectorAll('.clickable').forEach(element => {
 });
 </script>
 
+<img src="mypic.jpg" width="20%">
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmvU2XlVohcge4yysGUXhIdFvHts7Abcw",
+    authDomain: "aom58-780f9.firebaseapp.com",
+    projectId: "aom58-780f9",
+    storageBucket: "aom58-780f9.firebasestorage.app",
+    messagingSenderId: "63548286863",
+    appId: "1:63548286863:web:1aafaf2d2a55dbb1750dfa",
+    measurementId: "G-J7PQFFLT1R"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 </body>
 </html>
